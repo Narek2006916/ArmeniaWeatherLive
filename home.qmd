@@ -1,0 +1,191 @@
+---
+title: "Armenia Weather Live Analysis"
+author: "Your Name"
+format: html
+---
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(readr)
+
+artik <- read_csv("~/Desktop/ArmeniaWeatherLive/ArmeniaWeatherLive/Data/artik.csv")
+gavar <- read_csv("~/Desktop/ArmeniaWeatherLive/ArmeniaWeatherLive/Data/gavar.csv")
+maralik <- read_csv("~/Desktop/ArmeniaWeatherLive/ArmeniaWeatherLive/Data/maralik.csv")
+
+
+
+artik$time <- as.POSIXct(artik$time)
+gavar$time <- as.POSIXct(gavar$time)
+maralik$time <- as.POSIXct(maralik$time)
+
+# Descriptive Statistics
+summary(artik[, c("temperature", "pressure", "humidity", "speed", "rain")])
+summary(gavar[, c("temperature", "pressure", "humidity", "speed", "rain")])
+summary(maralik[, c("temperature", "pressure", "humidity", "speed", "rain")])
+
+# Temperature Trends
+# Temperature trends over time for Artik
+ggplot(artik, aes(x = time, y = temperature)) +
+  geom_line() +
+  ggtitle("Temperature Trend in Artik") +
+  xlab("Time") + ylab("Temperature (°C)") +
+  theme_minimal()
+
+# Temperature trends over time for Gavar
+ggplot(gavar, aes(x = time, y = temperature)) +
+  geom_line(color = "orange") +
+  ggtitle("Temperature Trend in Gavar") +
+  xlab("Time") + ylab("Temperature (°C)") +
+  theme_minimal()
+
+# Temperature trends over time for Maralik
+ggplot(maralik, aes(x = time, y = temperature)) +
+  geom_line(color = "green") +
+  ggtitle("Temperature Trend in Maralik") +
+  xlab("Time") + ylab("Temperature (°C)") +
+  theme_minimal()
+
+# Precipitation Analysis
+# Extract month and year
+artik <- artik %>% mutate(month = floor_date(time, "month"))
+gavar <- gavar %>% mutate(month = floor_date(time, "month"))
+maralik <- maralik %>% mutate(month = floor_date(time, "month"))
+
+# Group by month and sum precipitation
+artik_monthly_precip <- artik %>% group_by(month) %>% summarise(total_rain = sum(rain, na.rm = TRUE))
+gavar_monthly_precip <- gavar %>% group_by(month) %>% summarise(total_rain = sum(rain, na.rm = TRUE))
+maralik_monthly_precip <- maralik %>% group_by(month) %>% summarise(total_rain = sum(rain, na.rm = TRUE))
+
+# Plot monthly precipitation
+ggplot(artik_monthly_precip, aes(x = month, y = total_rain)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Monthly Precipitation in Artik") +
+  xlab("Month") + ylab("Total Precipitation (mm)") +
+  theme_minimal()
+
+ggplot(gavar_monthly_precip, aes(x = month, y = total_rain)) +
+  geom_bar(stat = "identity", fill = "orange") +
+  ggtitle("Monthly Precipitation in Gavar") +
+  xlab("Month") + ylab("Total Precipitation (mm)") +
+  theme_minimal()
+
+ggplot(maralik_monthly_precip, aes(x = month, y = total_rain)) +
+  geom_bar(stat = "identity", fill = "green") +
+  ggtitle("Monthly Precipitation in Maralik") +
+  xlab("Month") + ylab("Total Precipitation (mm)") +
+  theme_minimal()
+
+# Wind Speed Analysis
+# Wind speed trends over time for Artik
+ggplot(artik, aes(x = time, y = speed)) +
+  geom_line() +
+  ggtitle("Wind Speed Trend in Artik") +
+  xlab("Time") + ylab("Wind Speed (m/s)") +
+  theme_minimal()
+
+# Wind speed trends over time for Gavar
+ggplot(gavar, aes(x = time, y = speed)) +
+  geom_line(color = "orange") +
+  ggtitle("Wind Speed Trend in Gavar") +
+  xlab("Time") + ylab("Wind Speed (m/s)") +
+  theme_minimal()
+
+# Wind speed trends over time for Maralik
+ggplot(maralik, aes(x = time, y = speed)) +
+  geom_line(color = "green") +
+  ggtitle("Wind Speed Trend in Maralik") +
+  xlab("Time") + ylab("Wind Speed (m/s)") +
+  theme_minimal()
+
+# Humidity Analysis
+# Humidity trends over time for Artik
+ggplot(artik, aes(x = time, y = humidity)) +
+  geom_line() +
+  ggtitle("Humidity Trend in Artik") +
+  xlab("Time") + ylab("Humidity (%)") +
+  theme_minimal()
+
+# Humidity trends over time for Gavar
+ggplot(gavar, aes(x = time, y = humidity)) +
+  geom_line(color = "orange") +
+  ggtitle("Humidity Trend in Gavar") +
+  xlab("Time") + ylab("Humidity (%)") +
+  theme_minimal()
+
+# Humidity trends over time for Maralik
+ggplot(maralik, aes(x = time, y = humidity)) +
+  geom_line(color = "green") +
+  ggtitle("Humidity Trend in Maralik") +
+  xlab("Time") + ylab("Humidity (%)") +
+  theme_minimal()
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+# Load the data
+data <- read.csv("~/Desktop/ArmeniaWeatherLive/ArmeniaWeatherLive/Data/3754636.csv")
+
+data$DATE <- as.Date(data$DATE)
+
+# Filter data for the last 10 years
+start_date <- as.Date("2014-07-22")
+end_date <- as.Date("2024-07-22")
+data_filtered <- data %>% filter(DATE >= start_date & DATE <= end_date)
+
+# Convert temperatures from Fahrenheit to Celsius
+data_filtered <- data_filtered %>%
+  mutate(TAVG_C = (TAVG - 32) * 5/9,
+         TMAX_C = (TMAX - 32) * 5/9,
+         TMIN_C = (TMIN - 32) * 5/9)
+
+# Group by year and calculate summary statistics
+data_summary <- data_filtered %>%
+  mutate(year = year(DATE)) %>%
+  group_by(year) %>%
+  summarise(
+    max_temp = max(TMAX_C, na.rm = TRUE),
+    min_temp = min(TMIN_C, na.rm = TRUE),
+    avg_temp = mean(TAVG_C, na.rm = TRUE)
+  )
+
+# Melt data for plotting
+data_melted <- data_summary %>%
+  pivot_longer(cols = c(max_temp, min_temp, avg_temp),
+               names_to = "Temperature_Type",
+               values_to = "Temperature")
+
+# Plot the data
+ggplot(data_melted, aes(x = year, y = Temperature, color = Temperature_Type)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(title = "Temperature Summary (2014-2024)",
+       x = "Year",
+       y = "Temperature (°C)") +
+  theme_minimal() +
+  scale_color_manual(values = c("max_temp" = "red", "min_temp" = "blue", "avg_temp" = "green"),
+                     labels = c("Maximum Temperature", "Minimum Temperature", "Average Temperature"))
+```
+
+Գրաֆիկը ներկայացնում է Հայաստանի ջերմաստիճանը 2014-ից 2024 թվականներին, մենք կարող ենք ճշգրտել մեր դիտարկումներն ու վարկածները:
+
+Դիտարկումներ: Առավելագույն ջերմաստիճան (կանաչ գիծ)
+
+Առավելագույն ջերմաստիճանը 2014թ.-ից մինչև 2016թ.-ի մոտ աճ է ցույց տալիս՝ դրանից հետո կայունանալով աննշան տատանումներով: Սա վկայում է նախնական տարիների տաքացման հնարավոր միտումի մասին, որին հաջորդում է հարաբերական կայունության շրջանը: Նվազագույն ջերմաստիճան (կարմիր գիծ)
+
+Նվազագույն ջերմաստիճանը ցույց է տալիս հետևողական աճ մինչև մոտ 2017 թվականը, որից հետո այն կայունանում է։ Սա ցույց է տալիս, որ ձմեռներն ավելի մեղմ են դառնում, նվազագույն ջերմաստիճանը բարձրանում է: Միջին ջերմաստիճան (կապույտ գիծ)
+
+Միջին ջերմաստիճանը տատանվում է՝ տարեցտարի ցույց տալով որոշակի տատանումներ։ Չկա հստակ աճի կամ նվազման միտում, ինչը ցույց է տալիս, որ չնայած կան տատանումներ, միջին ջերմաստիճանը տվյալ ժամանակահատվածում չի ցուցաբերել հետևողական աճ կամ նվազում: Վարկածներ. Կլիմայի փոփոխության ազդեցությունը.
+
+Առավելագույն և նվազագույն ջերմաստիճանների սկզբնական աճը կարող է վերագրվել կլիմայի գլոբալ փոփոխությունների ազդեցությանը, ինչը կհանգեցնի Հայաստանում ավելի տաք ամառների և ավելի մեղմ ձմեռների: Սեզոնային փոփոխականություն.
+
+Միջին ջերմաստիճանի տատանումները հուշում են, որ կարող է լինել զգալի սեզոնային փոփոխականություն, որը հնարավոր է ազդի տեղումների, ամպամածության կամ այլ օդերևութաբանական գործոնների փոփոխություններից: Կայունացման ժամանակաշրջան.
+
+Ե՛վ առավելագույն, և՛ նվազագույն ջերմաստիճանների կայունացումը 2017 թվականից հետո կարող է ցույց տալ, որ Հայաստանը հասել է նոր կլիմայական հավասարակշռության, որտեղ ջերմաստիճանի բարձրացումներն առայժմ բարձրացել են։ Տարածաշրջանային ազդեցությունները.
+
+Տարածաշրջանային հատուկ գործոններ, ինչպիսիք են հողօգտագործման փոփոխությունները, ուրբանիզացիան կամ տարածաշրջանային կլիմայական օրինաչափությունները, կարող են ազդել Հայաստանում ջերմաստիճանի այս միտումների վրա: Այս դիտարկումները և վարկածները կարող են հետագայում հաստատվել տվյալների ավելի մանրամասն վերլուծությամբ և շրջակա միջավայրի այլ գործոնների հաշվառմամբ:
